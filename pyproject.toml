@@ -1,0 +1,26 @@
+[project]
+name = "srt-gen"
+authors = [{name = "PTA"}]
+version = "0.0.1"
+description = "text-to-speech with .srt subtitle files"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+classifiers = [
+    "Operating System :: OS Independent",
+    "Environment :: Console",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Multimedia :: Sound/Audio :: Speech"
+]
+requires-python = ">= 3.10"
+dependencies = [
+    "py3-tts-wrapper",
+    "srt",
+    "pydub",
+    "audioop-lts ; python_version >= '3.12'",
+    "tqdm",
+    "comtypes ; sys_platform == 'win32'",
+]
+
+[project.urls]
+Repository = "https://github.com/phineas-pta/srt-gen"
