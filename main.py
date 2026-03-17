@@ -5,10 +5,9 @@ import srt
 from datetime import timedelta
 from tqdm import tqdm
 from pydub import AudioSegment
-from pydub.effects import speedup
-from tts_wrapper import SAPIClient
+from tts_wrapper import eSpeakClient
 
-TTS = SAPIClient()
+TTS = eSpeakClient()
 SAMPLE_RATE = TTS.audio_rate
 CHANNELS = TTS.channels
 SAMPLE_WIDTH = TTS.sample_width
@@ -34,7 +33,7 @@ def srt_gen(subtitles: list[srt.Subtitle]) -> AudioSegment:
 			previous_end_time = entry.end  # still inside if block to avoid updating previous_end_time if text is empty
 
 	TTS.cleanup()
-	return speedup(final_audio, playback_speed=3)
+	return final_audio
 
 
 if __name__ == "__main__":
@@ -44,6 +43,9 @@ if __name__ == "__main__":
 	parser.add_argument("-i", "--input", help="Path to the input SRT file.", required=True)
 	parser.add_argument("-o", "--output", help="Path to the output WAV file.")
 	args = parser.parse_args()
+
+	if not args.input.lower().endswith(".srt") or (args.output is not None and not args.output.lower().endswith(".wav")):
+		raise ValueError("Input file must be an SRT file and output file must be a WAV file (if provided).")
 
 	with open(args.input, "r", encoding="utf-8") as f:
 		subtitles = list(srt.parse(f.read()))

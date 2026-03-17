@@ -12,14 +12,13 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Topic :: Multimedia :: Sound/Audio :: Speech"
 ]
-requires-python = ">= 3.10"
+requires-python = ">= 3.8"
 dependencies = [
     "py3-tts-wrapper",
     "srt",
     "pydub",
-    "audioop-lts ; python_version >= '3.12'",
+    "audioop-lts ; python_version >= '3.13'",
     "tqdm",
-    "comtypes ; sys_platform == 'win32'",
 ]
 
 [project.urls]
