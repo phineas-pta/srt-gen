@@ -2,14 +2,16 @@
 # -*- coding: utf-8 -*-
 
 import srt
-from io import BytesIO
 from datetime import timedelta
 from tqdm import tqdm
 from pydub import AudioSegment
+from pydub.effects import speedup
 from tts_wrapper import SAPIClient
 
 TTS = SAPIClient()
 SAMPLE_RATE = TTS.audio_rate
+CHANNELS = TTS.channels
+SAMPLE_WIDTH = TTS.sample_width
 
 
 def srt_gen(subtitles: list[srt.Subtitle]) -> AudioSegment:
@@ -18,12 +20,21 @@ def srt_gen(subtitles: list[srt.Subtitle]) -> AudioSegment:
 
 	for entry in tqdm(subtitles, desc="Processing subtitles"):
 		if (silence := entry.start - previous_end_time) > timedelta():
-			final_audio += AudioSegment.silent(duration=1000*silence.total_seconds(), frame_rate=SAMPLE_RATE)
+			final_audio += AudioSegment.silent(
+				duration=1000 * silence.total_seconds() / SAMPLE_RATE,  # weird math otherwise silence is too long
+				frame_rate=SAMPLE_RATE
+			)
 		if (text := entry.content.strip()) != "":
-			final_audio += AudioSegment.from_wav(BytesIO(TTS.synth_to_bytes(text)))
+			final_audio += AudioSegment(
+				data=TTS.synth_to_bytes(text),
+				sample_width=SAMPLE_WIDTH,
+				frame_rate=SAMPLE_RATE,
+				channels=CHANNELS
+			)
 			previous_end_time = entry.end  # still inside if block to avoid updating previous_end_time if text is empty
 
-	return final_audio
+	TTS.cleanup()
+	return speedup(final_audio, playback_speed=3)
 
 
 if __name__ == "__main__":
@@ -38,10 +49,10 @@ if __name__ == "__main__":
 		subtitles = list(srt.parse(f.read()))
 	res = srt_gen(subtitles)
 	if len(res) > 0:
-		if args.output is None:
+		if args.output is not None:
+			output_path = args.output
+		else:
 			import os.path
 			output_path = os.path.splitext(args.input)[0] + ".wav"
 			print("No output path provided: output will be saved to same folder as input")
-		else:
-			output_path = args.output
-		res.export(args.output, format="wav")
+		res.export(output_path, format="wav")
