@@ -1,3 +1,11 @@
+ffmpeg.exe
+ffplay.exe
+ffprobe.exe
+espeak-ng.exe
+libespeak-ng.dll
+espeak-ng-data/
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
